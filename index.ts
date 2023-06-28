@@ -4,15 +4,27 @@ type BuzzWordSpecs = {
     content : string;
     priority : string;
 }
+
+function readNumberFromConsole() : number {
+    const prompt : any = require('prompt-sync')({sigint : true});
+    let userInput : number = NaN;
+
+    while (isNaN(userInput)) {
+        userInput = Number(prompt("Please enter max. number for Fizz Buzz: "));
+    }
+
+    return userInput;
+}
 function readUserDefinedRules() : Map<number, BuzzWordSpecs> {
-    console.log("For each rule, enter {[NUMBER] [BUZZWORD] [F/B/R]}, F - append to the FRONT, B - append to the BACK, R - reverse.\n If the rule wasn't " +
+    console.log("For each rule, enter {[NUMBER] [BUZZWORD] [F/B/R/P]}, F - append to the FRONT, B - append to the BACK, R - reverse, P - immediately" +
+        "in front of 1st thing starting with B.\n If the rule wasn't " +
         "formatted properly, it will be completely ignored.\n Type S to end.\n");
 
     const ruleInterface : any = require('prompt-sync')({sigint: true});
 
     const ruleDictionary : Map<number, BuzzWordSpecs> = new Map<number, BuzzWordSpecs>();
 
-    const possiblePriorities : string[] = ['F', 'B', 'R'];
+    const possiblePriorities : string[] = ['F', 'B', 'R', 'P'];
 
     while (true) {
         let userInput : string | null = ruleInterface("Enter a new rule: ");
@@ -34,6 +46,15 @@ function readUserDefinedRules() : Map<number, BuzzWordSpecs> {
     return ruleDictionary;
 }
 
+function getFirstIndexStartingWithLetter(indexes : number[], rules : Map<number, BuzzWordSpecs>, letter : string) : number {
+    let ans : number = -1;
+    indexes.forEach(function (index : number): void {
+        if (ans == -1 && rules.get(index)?.content[0] == letter) {
+            ans = index;
+        }
+    });
+    return ans == -1 ? indexes.length : ans - 1;
+}
 function fizzBuzzWithUserDefinedRules() : void {
     const userRules : Map<number, BuzzWordSpecs> = readUserDefinedRules();
     let maxNumber : number = readNumberFromConsole();
@@ -55,6 +76,10 @@ function fizzBuzzWithUserDefinedRules() : void {
                         ansIndexes.reverse();
                         break;
                     }
+                    case "P": {
+                        ansIndexes.splice(getFirstIndexStartingWithLetter(ansIndexes, userRules, "B"), 0, divBy);
+                        break;
+                    }
                 }
             }
         });
@@ -69,16 +94,14 @@ function fizzBuzzWithUserDefinedRules() : void {
         }
     }
 }
-function readNumberFromConsole() : number {
-    const prompt : any = require('prompt-sync')({sigint : true});
-    let userInput : number = NaN;
 
-    while (isNaN(userInput)) {
-        userInput = Number(prompt("Please enter max. number for Fizz Buzz"));
-    }
 
-    return userInput;
-}
+
+fizzBuzzWithUserDefinedRules();
+
+/*
+OLD CODE: only for history purposes
+
 
 function fizzbuzz() : void {
     let i : number = 0;
@@ -122,8 +145,6 @@ function fizzbuzz() : void {
     }
 }
 
-/*
-fizzbuzz();*/
-/*
-console.log(readUserDefinedRules());*/
-fizzBuzzWithUserDefinedRules();
+fizzbuzz();
+console.log(readUserDefinedRules());
+ */
